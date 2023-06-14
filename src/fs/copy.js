@@ -1,19 +1,16 @@
-const fs = require('fs');
-const promises = require('fs/promises');
-const path = require('path');
-const { mkdir, rmdir, copyFile } = promises;
+import fs from 'fs';
+import { promises, mkdir, copyFile, readdir, stat } from 'fs:promises';
+import path from 'path';
 import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-//const deleteFile = fs.promises.unlink;
-
 const copyDirectory = async (dirName, dirNameCopy) => {
-    const files = await promises.readdir(dirName);
+    const files = await readdir(dirName);
     for(let file of files) {
-        let stat = await promises.stat(path.join(dirName, file));
-        if (stat.isFile()) {
+        let isFile = await stat(path.join(dirName, file));
+        if (isFile.isFile()) {
             await copyFile(path.join (dirName, file), path.join (dirNameCopy, file));
         }
         else {
