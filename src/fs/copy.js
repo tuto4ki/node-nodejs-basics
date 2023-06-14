@@ -1,5 +1,4 @@
-import fs from 'fs';
-import { promises, mkdir, copyFile, readdir, stat } from 'fs:promises';
+import { mkdir, copyFile, readdir, stat, access } from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -7,7 +6,8 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const copyDirectory = async (dirName, dirNameCopy) => {
-    const files = await readdir(dirName);
+    const files = await readdir(dirName, { recursive: true });
+
     for(let file of files) {
         let isFile = await stat(path.join(dirName, file));
         if (isFile.isFile()) {
@@ -23,49 +23,29 @@ const copyDirectory = async (dirName, dirNameCopy) => {
 const copy = async () => {
     const dirName = path.join(__dirname, 'files');
     const dirNameCopy = path.join(__dirname, 'files_copy');
+    const errorMessage = 'FS operation failed';
 
-    await mkdir(dirNameCopy, { recursive: true });
-    await copyDirectory(dirName, dirNameCopy);
+    try {
+        await access(dirName).catch((err) => {
+            if (err) {
+                if (err.code === 'ENOENT') {
+                    throw new Error(errorMessage);
+                }
+            }
+        });
+
+        await mkdir(dirNameCopy, { recursive: false }).catch((err) => {
+            if (err) {
+                if (err.code == 'EEXIST') {
+                    throw new Error(errorMessage);
+                }
+            }
+        });
+
+        await copyDirectory(dirName, dirNameCopy);
+    } catch (err) {
+        console.error(err);
+    }
 };
 
 await copy();
-
-/**
- * 
-
-async function createAssets (dirName, dirNameCopy) {
-    await mkdir(dirNameCopy, { recursive: true });
-    await deleteDirectory (dirNameCopy);
-    await copyDirectory(dirName, dirNameCopy);
-}
-
-async function deleteDirectory (dirName) {
-    const files = await promises.readdir(dirName);
-    for(let file of files) {
-        let stat = await promises.stat(path.join(dirName, file));
-        if (stat.isFile()) {
-            await deleteFile (path.join(dirName, file));
-        }
-        else {
-            await deleteDirectory(path.join(dirName, file));
-            await rmdir(path.join(dirName, file));
-        }
-    }
-}
-
-async function copyDirectory (dirName, dirNameCopy) {
-    const files = await promises.readdir(dirName);
-    for(let file of files) {
-        let stat = await promises.stat(path.join(dirName, file));
-        if (stat.isFile()) {
-            await copyFile(path.join (dirName, file), path.join (dirNameCopy, file));
-        }
-        else {
-            await mkdir (path.join (dirNameCopy, file), { recursive: true });
-            await copyDirectory (path.join (dirName, file), path.join (dirNameCopy, file));
-        }
-    }
-}
-
-createAssets(path.join(__dirname, 'files'), path.join(__dirname, 'files-copy'));
- */

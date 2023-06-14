@@ -12,7 +12,6 @@ const create = async () => {
     try {
         fs.access(pathFile, function(error) {
             if(error == null) {
-
                 throw new Error(errorText);
             } else if(error.code == 'ENOENT') {
                 fs.appendFile(pathFile, contentFile, () => {});
