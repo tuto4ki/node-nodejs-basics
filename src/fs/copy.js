@@ -25,7 +25,7 @@ const copyDirectory = async (dirName, dirNameCopy) => {
 
 const copy = async () => {
     const dirName = path.join(__dirname, 'files');
-    const copyDirName = path.join(__dirname, 'files_copy');
+    const dirNameCopy = path.join(__dirname, 'files_copy');
 
     await mkdir(dirNameCopy, { recursive: true });
     await copyDirectory(dirName, dirNameCopy);
