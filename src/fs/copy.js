@@ -27,24 +27,20 @@ const copy = async () => {
 
     try {
         await access(dirName).catch((err) => {
-            if (err) {
-                if (err.code === 'ENOENT') {
-                    throw new Error(errorMessage);
-                }
+            if (err.code === 'ENOENT') {
+                throw new Error(errorMessage+'1');
             }
         });
 
         await mkdir(dirNameCopy, { recursive: false }).catch((err) => {
-            if (err) {
-                if (err.code == 'EEXIST') {
-                    throw new Error(errorMessage);
-                }
+            if (err.code === 'EEXIST') {
+                throw new Error(errorMessage+'2');
             }
         });
 
         await copyDirectory(dirName, dirNameCopy);
     } catch (err) {
-        console.error(err);
+        console.error(err.message);
     }
 };
 

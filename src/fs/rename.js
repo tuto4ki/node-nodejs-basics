@@ -1,4 +1,3 @@
-import { promises } from 'fs';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -12,21 +11,18 @@ const rename = async () => {
 
     const errorMessage = 'FS operation failed';
     
-    try {
-        fs.stat(fileNewName, (err) => {
-            if (!err) {
-                throw new Error(errorMessage);
-            } else if (err.code === 'ENOENT') {
-                promises.rename(filesOldName, fileNewName).catch((err) => {
-                    if (err?.code === 'ENOENT') {
-                        throw new Error(errorMessage);
-                    }
-                });
-            }
-        })
-    } catch (err) {
-        console.error(err);
-    }
+    
+    fs.stat(fileNewName, (err) => {
+        if (!err) {
+            throw new Error(errorMessage);
+        } else if (err.code === 'ENOENT') {
+            fs.rename(filesOldName, fileNewName, (err) => {
+                if (err?.code === 'ENOENT') {
+                    throw new Error(errorMessage);
+                }
+            });
+        }
+    });
 };
 
 await rename();

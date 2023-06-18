@@ -1,4 +1,4 @@
-import fs from 'fs';
+import { readdir } from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -9,16 +9,18 @@ const list = async () => {
     const dirName =  path.join(__dirname, 'files');
     const errorMessage = 'FS operation failed';
 
-    fs.readdir(dirName,
-        (error, items) => {
-            if (error?.code === 'ENOENT') {
+    try {
+        const files = await readdir(dirName).catch((err) => {
+            if (err?.code === 'ENOENT') {
                 throw new Error(errorMessage);
             }
-            for (let i = 0; i < items.length; i++) {
-                process.stdout.write(`${items[i]}\n`);
-            }
+        });
+        for (const file of files) {
+            process.stdout.write(`${file}\n`);
         }
-    );
+    } catch (error) {
+        console.log(error.message);
+    }
 };
 
 await list();

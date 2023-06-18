@@ -1,4 +1,4 @@
-import fs from 'fs';
+import { access, appendFile } from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -9,16 +9,16 @@ const create = async () => {
     const pathFile = path.join(__dirname, 'files/fresh.txt');
     const contentFile = 'I am fresh and young';
     const errorText = 'FS operation failed';
+
     try {
-        fs.access(pathFile, function(error) {
-            if(error == null) {
-                throw new Error(errorText);
-            } else if(error.code == 'ENOENT') {
-                fs.appendFile(pathFile, contentFile, () => {});
-            }
-        });
-    } catch(err) {
-        console.error(err);
+        await access(pathFile);
+        throw new Error(errorText);
+    } catch (error) {
+        if (error.code === 'ENOENT') {
+            await appendFile(pathFile, contentFile);
+        } else {
+            console.error(error.message);
+        }
     }
 };
 
