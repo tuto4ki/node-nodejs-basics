@@ -13,6 +13,7 @@ const write = async () => {
         constructor(fileName) {
           super();
           this.fileName = fileName;
+          this.fileDescriptor = null;
         }
 
         _construct(callback) {
